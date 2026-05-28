@@ -1,14 +1,78 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useReducer, useMemo  } from 'react'
+// import 'dotenv/config';
+import {Filter,Todo, AppState, Action, initialState} from "./types";
 
 // Issue 1: Inline API key (security issue)
-const API_KEY = 'sk-1234567890abcdef'
+const API_KEY = process.env.API_KEY
 
-function App() {
-  // Issue 2: State management bisa lebih baik
-  const [todos, setTodos] = useState([])
-  const [input, setInput] = useState('')
-  const [filter, setFilter] = useState('all')
+
+function reducer(state: AppState, action: Action): AppState {
+  switch (action.type) {
+    case "SET_INPUT":
+      return { ...state, input: action.payload };
+
+    case "ADD_TODO":
+      if (!state.input.trim()) return state;
+
+      return {
+        ...state,
+        todos: [
+          ...state.todos,
+          {
+            id: Date.now(),
+            text: state.input,
+            completed: false,
+          },
+        ],
+        input: "",
+      };
+
+    case "TOGGLE_TODO":
+      return {
+        ...state,
+        todos: state.todos.map((todo) =>
+          todo.id === action.payload
+            ? { ...todo, completed: !todo.completed }
+            : todo
+        ),
+      };
+
+    case "DELETE_TODO":
+      return {
+        ...state,
+        todos: state.todos.filter(
+          (todo) => todo.id !== action.payload
+        ),
+      };
+
+    case "SET_FILTER":
+      return {
+        ...state,
+        filter: action.payload,
+      };
+
+    default:
+      return state;
+  }
+}
+
+
+export default function App() {
   
+  
+  const [state, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
+
+
+
+
+  // Issue 2: State management bisa lebih baik
+  // const [todos, setTodos] = useState([])
+  // const [input, setInput] = useState('')
+  // const [filter, setFilter] = useState('all')
+
   // Issue 3: useEffect tanpa dependency array yang tepat
   useEffect(() => {
     // Load from localStorage
