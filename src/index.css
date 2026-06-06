@@ -42,7 +42,7 @@ input {
   font-size: 14px;
 }
 
-button {
+.button {
   padding: 10px 20px;
   background: #007bff;
   color: white;
@@ -50,6 +50,10 @@ button {
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
+}
+
+.button.active {
+  background: #28a745;
 }
 
 button:hover {
