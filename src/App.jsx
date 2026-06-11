@@ -390,13 +390,39 @@ function App() {
           ) : (
             filteredTodos.map((todo) => (
               <div key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
+                {/*
+                  BUG: Checkbox appears to "delete" the todo when clicked.
+                  
+                  ROOT CAUSE: The filter state defaults to 'all', but if the user is on the
+                  'active' filter, checking a todo marks it completed — which immediately
+                  removes it from the 'active' view. This looks like deletion but is actually
+                  correct filtering behaviour. The todo still exists; switch to 'All' to see it.
+
+                  HOWEVER, there is also a real bug here:
+                  The <button> below has no type="button" attribute.
+                  In HTML, a <button> without an explicit type defaults to type="submit".
+                  If anything wraps this in a <form> in the future, clicking the delete
+                  button (or pressing Enter near it) would submit the form AND call deleteTodo,
+                  causing confusing double-fire behaviour.
+
+                  ❌ <button className="delete-btn" onClick={...}>
+                  ✅ <button type="button" className="delete-btn" onClick={...}>
+
+                  Always set type="button" on buttons that are not meant to submit a form.
+                */}
                 <input
                   type="checkbox"
                   checked={todo.completed}
+                  // ✅ onChange correctly calls toggleTodo (not deleteTodo)
+                  // If todos disappear on check, you are likely on the 'Active' filter —
+                  // completed todos are hidden from that view by design. Switch to 'All'.
                   onChange={() => toggleTodo(todo.id)}
                 />
                 <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(todo.text) }} />
+                {/* ✅ type="button" added — prevents accidental form submission */}
+                {/* ❌ <button className="delete-btn" onClick={() => deleteTodo(todo.id)}> */}
                 <button
+                  type="button"
                   className="delete-btn"
                   onClick={() => deleteTodo(todo.id)}
                 >
